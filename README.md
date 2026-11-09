@@ -2,13 +2,11 @@
 
 소형 LLM이 반도체 용어를 일관되게 번역하도록 용어집을 주입하고, 적용 결과를 화면에서 확인할 수 있게 만든 로컬 번역 서비스
 
-<!--
-화면 캡처를 docs/ 폴더에 넣은 뒤 이 주석을 지우면 이미지가 표시됩니다.
-![데스크톱 화면](docs/desktop.png)
-![모바일 화면](docs/mobile.png)
--->
+![데스크톱 화면](local-llm-glossary-translator/frontend/result1.png)
+![모바일 화면](local-llm-glossary-translator/frontend/result2.png)
 
 > 도메인 용어집을 적용한 **번역 프로토타입**입니다. 번역 성능을 입증하는 도구가 아니라, 용어집 주입 방식이 용어 일관성에 미치는 영향을 작은 실험으로 확인한 프로젝트입니다. 실험 범위와 한계는 [5. 실험](#5-실험)에 적었습니다.
+
 
 ## 1. 프로젝트 개요
 
@@ -258,7 +256,6 @@ npm run dev
 local-llm-translator/
 ├─ backend/        main.py
 ├─ frontend/       React 프로젝트 (Vite)
-├─ experiments/    문장 세트 실험 엑셀
-├─ docs/           화면 캡처
+|      └─ result/    문장 세트 실험 엑셀, 화면 캡처, 시연영상
 └─ README.md
 ```
