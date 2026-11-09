@@ -1,0 +1,641 @@
+/* ─────────────────────────────────────────────
+   0. 색·글꼴·간격을 변수로 모아 둔다
+   (색을 바꾸고 싶으면 여기만 고치면 된다)
+   ───────────────────────────────────────────── */
+:root {
+  --paper: #f3f6f8;          /* 바탕: 클린룸 같은 차가운 회색 */
+  --surface: #ffffff;
+  --ink: #1e2b37;
+  --muted: #5d6b78;
+  --line: #d5dde3;
+  --line-strong: #b9c5ce;
+  --primary: #24547e;        /* 실리콘 블루: 버튼과 포커스 */
+  --primary-dark: #1b4266;
+  --primary-soft: #e6eef5;
+  --marker: 255, 214, 64;    /* 형광펜 노랑: 용어 표시에만 쓴다 */
+  --ok: #1c7a52;
+  --danger: #b3261e;
+  --danger-soft: #fbeceb;
+
+  --font: "Pretendard Variable", Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+    "Malgun Gothic", "Noto Sans CJK KR", system-ui, sans-serif;
+
+  --radius: 8px;
+  --gutter: clamp(16px, 4vw, 40px); /* 화면이 넓을수록 좌우 여백이 커진다 (최소 16px, 최대 40px) */
+}
+
+/* ─────────────────────────────────────────────
+   1. 기본 설정
+   ───────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* 전체 틀: 화면이 아무리 넓어도 1120px까지만 늘어난다 */
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 var(--gutter) 64px;
+}
+
+/* ─────────────────────────────────────────────
+   2. 머리말  (모바일 기준으로 먼저 작성)
+   ───────────────────────────────────────────── */
+.masthead {
+  display: flex;
+  flex-wrap: wrap; /* 좁으면 상태 표시가 아래 줄로 내려간다 */
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 20px 0 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.logo {
+  flex: none;
+  width: clamp(34px, 9vw, 44px);
+  height: auto;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.25rem, 1rem + 1.4vw, 1.75rem); /* 화면 폭에 맞춰 부드럽게 커지는 글자 크기 */
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.tagline {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px; /* 손가락으로 누르기 편한 최소 높이 */
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.status:hover {
+  background: var(--primary-soft);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.status[data-state="online"] .dot {
+  background: var(--ok);
+}
+
+.status[data-state="offline"] .dot {
+  background: var(--danger);
+}
+
+/* ─────────────────────────────────────────────
+   3. 용어집 스위치
+   ───────────────────────────────────────────── */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin: 4px 0 8px;
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.switch-track {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--line-strong);
+  transition: background-color 0.15s;
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+
+.switch input:checked + .switch-track {
+  background: var(--primary);
+}
+
+.switch input:checked + .switch-track .switch-thumb {
+  transform: translateX(18px);
+}
+
+.switch input:focus-visible + .switch-track {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.switch-label {
+  font-weight: 600;
+}
+
+.switch-note {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* ─────────────────────────────────────────────
+   4. 번역 작업대
+   모바일: 원문 위, 결과 아래로 쌓인다
+   데스크톱: 왼쪽 원문, 오른쪽 결과 (아래 @media 참고)
+   ───────────────────────────────────────────── */
+.stage {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.langbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  background: #fafcfd;
+}
+
+.langbar select {
+  flex: 1 1 0;
+  min-width: 0; /* 이 줄이 없으면 긴 글자가 있을 때 화면 밖으로 삐져나온다 */
+  min-height: 44px;
+  padding: 0 32px 0 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235d6b78' stroke-width='2'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  font-weight: 600;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.langbar select:hover {
+  background-color: var(--primary-soft);
+}
+
+.swap {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 1.125rem;
+  cursor: pointer;
+}
+
+.swap:hover {
+  background: var(--primary-soft);
+}
+
+.panes {
+  display: grid;
+  grid-template-columns: 1fr; /* 모바일: 한 칸 */
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pane + .pane {
+  border-top: 1px solid var(--line);
+}
+
+.source-input {
+  flex: 1;
+  width: 100%;
+  min-height: 190px;
+  padding: 14px 16px;
+  border: 0;
+  background: transparent;
+  font-size: 1.0625rem; /* 16px 이상이어야 아이폰이 입력창을 멋대로 확대하지 않는다 */
+  line-height: 1.65;
+  resize: vertical;
+}
+
+.source-input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.output {
+  flex: 1;
+  min-height: 190px;
+  padding: 14px 16px;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere; /* 긴 영어 단어도 줄바꿈된다 */
+}
+
+.output p {
+  margin: 0;
+}
+
+.output-text {
+  white-space: pre-wrap;
+}
+
+.placeholder {
+  color: var(--muted);
+}
+
+.pane-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  min-height: 60px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--line);
+}
+
+.foot-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.counter,
+.time-note {
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.counter.near-limit {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────
+   5. 버튼
+   ───────────────────────────────────────────── */
+.btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.btn-quiet {
+  background: transparent;
+  color: var(--muted);
+}
+
+.btn-quiet:hover:not(:disabled) {
+  background: var(--primary-soft);
+  color: var(--ink);
+}
+
+.btn-outline {
+  background: var(--surface);
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--primary-soft);
+}
+
+/* ─────────────────────────────────────────────
+   6. 형광펜 표시: 이 화면에서 가장 눈에 띄는 한 곳
+   용어가 적용된 번역어 위로 형광펜이 한 번 훑고 지나간다
+   ───────────────────────────────────────────── */
+mark {
+  color: inherit;
+  padding: 0 0.1em;
+  background-color: transparent;
+  background-image: linear-gradient(transparent 52%, rgba(var(--marker), 0.85) 52%);
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  animation: marker-sweep 0.45s ease-out 0.12s forwards;
+}
+
+@keyframes marker-sweep {
+  to {
+    background-size: 100% 100%;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   7. 오류 안내와 적용된 용어 목록
+   ───────────────────────────────────────────── */
+.notice-error {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e6b8b4;
+  border-radius: 6px;
+  background: var(--danger-soft);
+  color: #7a1912;
+}
+
+.inspection {
+  margin-top: 16px;
+}
+
+.inspection h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.inspection-empty {
+  margin: 0;
+  color: var(--muted);
+}
+
+.term-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* 칸 수가 화면 폭에 맞춰 저절로 정해진다 */
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.term-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.term-item.miss {
+  border-color: #e6b8b4;
+  background: var(--danger-soft);
+}
+
+.term-pair {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.term-arrow {
+  margin: 0 6px;
+  color: var(--muted);
+}
+
+.term-state {
+  flex: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ok);
+}
+
+.term-item.miss .term-state {
+  color: var(--danger);
+}
+
+/* ─────────────────────────────────────────────
+   8. 접는 패널
+   ───────────────────────────────────────────── */
+.panels {
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.panel {
+  border-bottom: 1px solid var(--line);
+}
+
+.panel summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+
+.panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.panel summary::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+
+.panel[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.panel-body {
+  padding: 0 0 20px;
+}
+
+.panel-note {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.term-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 6px 16px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+}
+
+/* 용어 추가 한 줄:
+   모바일은 영어/한국어를 위아래로, 넓은 화면은 한 줄로 배치한다 */
+.term-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "en rm"
+    "ko rm";
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.term-row input {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 1rem;
+}
+
+.term-en {
+  grid-area: en;
+}
+
+.term-ko {
+  grid-area: ko;
+}
+
+.term-remove {
+  grid-area: rm;
+  height: 100%;
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); /* 서버 주소가 중간에 끊기지 않을 폭 */
+  gap: 14px 20px;
+  margin: 0;
+}
+
+.meta div {
+  min-width: 0;
+}
+
+.meta dt {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.meta dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* ─────────────────────────────────────────────
+   9. 화면이 넓어질 때만 바뀌는 부분 (media query)
+   min-width: "이 폭 이상이면"이라는 뜻
+   ───────────────────────────────────────────── */
+@media (min-width: 560px) {
+  .term-row {
+    grid-template-columns: 1fr 1fr auto;
+    grid-template-areas: "en ko rm";
+  }
+
+  .term-remove {
+    height: auto;
+  }
+}
+
+@media (min-width: 860px) {
+  .panes {
+    grid-template-columns: 1fr 1fr; /* 원문과 결과를 좌우로 나란히 */
+  }
+
+  .pane + .pane {
+    border-top: 0;
+    border-left: 1px solid var(--line);
+  }
+
+  .source-input,
+  .output {
+    min-height: 280px;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   10. 움직임을 줄이고 싶은 사용자 설정을 존중한다
+   ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+
+  mark {
+    animation: none;
+    background-size: 100% 100%;
+  }
+}
