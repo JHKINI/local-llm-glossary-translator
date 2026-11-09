@@ -1,8 +1,9 @@
 # 반도체 용어 번역기
 
 소형 LLM이 반도체 용어를 일관되게 번역하도록 용어집을 주입하고, 적용 결과를 화면에서 확인할 수 있게 만든 로컬 번역 서비스
+
 [데스크톱 화면]
-<img src="frontend/result/result1.png" width="200" height="400"/>
+<img src="frontend/result/result1.png" width="500"/>
 [모바일 화면]
 ![모바일 화면](frontend/result/result2.png)
 
