@@ -7,7 +7,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434")
+# Ollama 서버 주소와 모델. 환경변수 OLLAMA_URL / OLLAMA_MODEL로 바꿀 수 있다. (docker compose는 .env 사용)
+_raw_url = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434").strip().rstrip("/")
+if "://" not in _raw_url:
+    _raw_url = "https://" + _raw_url  # 'gemma.aikopo.net'처럼 스킴 없이 적어도 동작
+OLLAMA_URL = _raw_url
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3.5:4b")
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0"))
 
@@ -112,6 +116,13 @@ async def translate(req: TranslateRequest):
                 f"{OLLAMA_URL}/api/chat",
                 json=payload
             )
+            # 모델이 think 옵션을 지원하지 않으면 400 + 'think' 안내가 온다 → think 빼고 재시도
+            if r.status_code == 400 and "think" in r.text.lower():
+                payload.pop("think", None)
+                r = await client.post(
+                    f"{OLLAMA_URL}/api/chat",
+                    json=payload
+                )
             r.raise_for_status()
 
     except httpx.HTTPError as e:

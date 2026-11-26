@@ -1,0 +1,6 @@
+venv
+__pycache__
+*.pyc
+.github
+main_1.py
+main_2.py

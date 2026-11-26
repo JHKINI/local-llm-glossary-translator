@@ -13,3 +13,6 @@ dist/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# 배포용 압축본 보관 폴더
+_deploy/

@@ -1,0 +1,25 @@
+name: semiconductor-translator
+
+services:
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      # 기본값: 내 PC(호스트)에서 돌고 있는 Ollama. 다른 서버를 쓰려면 .env 로 바꾼다.
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:4b}
+      TEMPERATURE: ${TEMPERATURE:-0}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # Linux에서도 host.docker.internal 사용
+    # 호스트에 직접 열지 않고 web(nginx)을 통해서만 접근합니다.
+    # Swagger(/docs)를 직접 보고 싶으면 아래 주석을 풀어 주세요.
+    # ports:
+    #   - "8002:8002"
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${WEB_PORT:-8081}:80"
